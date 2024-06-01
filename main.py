@@ -3,7 +3,7 @@ import network
 import socket
 import urequests as requests
 from ili934xnew import ILI9341, color565
-from time import sleep
+import time
 import tt32
 import tt24
 import tt14
@@ -19,8 +19,12 @@ TFT_RST_PIN = 15  # Reset
 TFT_DC_PIN = 14  # Data/Command
 TFT_LED_PIN = 9  # LED
 
-# Button pin configuration
+# Configure the button pin with a pull-down resistor
 BUTTON_PIN = 17  # Button connected to GPIO 17
+LONG_PRESS_TIME = 3000  # Long press time in milliseconds
+button_pressed_time = 0
+button_released_time = 0
+button_state = "idle"
 
 # TFT screen configuration
 spi = SPI(1, baudrate=128000000, polarity=0, phase=0, sck=Pin(TFT_CLK_PIN), mosi=Pin(TFT_MOSI_PIN), miso=Pin(TFT_MISO_PIN))
@@ -29,10 +33,6 @@ display = ILI9341(spi, cs=Pin(TFT_CS_PIN), dc=Pin(TFT_DC_PIN), rst=Pin(TFT_RST_P
 # Configure the LED pin
 led = Pin(TFT_LED_PIN, Pin.OUT)
 led.value(1)  # Turn on the backlight
-
-# Timer to prevent button from being pressed more than once every 10 seconds
-button_timer = Timer(-1)
-button_enabled = True
 
 # Save Wi-Fi credentials to a file
 def save_credentials(ssid, password):
@@ -48,6 +48,20 @@ def load_credentials():
         return credentials['ssid'], credentials['password']
     except OSError:
         return None, None
+
+# Save tokens to a file
+def save_tokens(tokens):
+    with open('tokens.json', 'w') as f:
+        json.dump(tokens, f)
+
+# Load tokens from a file
+def load_tokens():
+    try:
+        with open('tokens.json', 'r') as f:
+            tokens = json.load(f)
+        return tokens
+    except OSError:
+        return ["BTC", "ETH", "ADA", "BNB", "SOL"]  # Default values
 
 # URL-decode function
 def url_decode(value):
@@ -82,7 +96,7 @@ def connect_wifi(ssid, password):
             return True
         max_wait -= 1
         print('Waiting for connection...')
-        sleep(1)
+        time.sleep(1)
     print('Could not connect to WiFi')
     return False
 
@@ -102,7 +116,7 @@ def display_ap_info():
     display.set_pos(10, 10)
     display.write("Network: CryptoDash")
     display.set_pos(10, 40)
-    display.write("Password: 12345678")
+    display.write("Password: 123456789")
     display.set_pos(10, 90)
     display.write("Connect and visit:")
     display.set_pos(10, 120)
@@ -115,14 +129,101 @@ config_page = """
 <html>
 <head>
     <title>WiFi Config</title>
+    <style>
+        body {
+            background: linear-gradient(45deg, #4e54c8, #d1d3ff);
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 320px;
+        }
+        h2, h5 {
+            text-align: center;
+            color: #333333;
+        }
+        .input-container {
+            margin: 10px 0px 20px;
+            border-radius: 5px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #797979;
+            background-color: transparent;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: none;
+            border-radius: 5px;
+            box-sizing: border-box;
+            background-color: #e9e9e9;
+        }
+        input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
-    <h1>WiFi Config</h1>
-    <form action="/configure" method="post">
-        SSID: <input type="text" name="ssid"><br>
-        Password: <input type="text" name="password"><br>
-        <input type="submit" value="Submit">
-    </form>
+    <div class="container">
+        <h2>WiFi Config</h2>
+        <form action="/configure" method="post">
+            <div class="input-container">
+                <label for="ssid">SSID</label>
+                <input type="text" id="ssid" name="ssid">
+            </div>
+            <div class="input-container">
+                <label for="password">PASSWORD</label>
+                <input type="text" id="password" name="password">
+            </div>
+            <h2>Cryptocurrencies</h2>
+            <h5>Use Symbol (BTC, ETH, ADA...)</h5>
+            <div class="input-container">
+                <label for="crypto1">Cryptocurrency 1</label>
+                <input type="text" id="crypto1" name="crypto1">
+            </div>
+            <div class="input-container">
+                <label for="crypto2">Cryptocurrency 2</label>
+                <input type="text" id="crypto2" name="crypto2">
+            </div>
+            <div class="input-container">
+                <label for="crypto3">Cryptocurrency 3</label>
+                <input type="text" id="crypto3" name="crypto3">
+            </div>
+            <div class="input-container">
+                <label for="crypto4">Cryptocurrency 4</label>
+                <input type="text" id="crypto4" name="crypto4">
+            </div>
+            <div class="input-container">
+                <label for="crypto5">Cryptocurrency 5</label>
+                <input type="text" id="crypto5" name="crypto5">
+            </div>
+            <input type="submit" value="SUBMIT">
+        </form>
+    </div>
 </body>
 </html>
 """
@@ -134,6 +235,14 @@ def handle_configure(request):
         params = body.split('&')
         ssid = url_decode(params[0].split('=')[1])
         password = url_decode(params[1].split('=')[1])
+        crypto1 = url_decode(params[2].split('=')[1]).upper()
+        crypto2 = url_decode(params[3].split('=')[1]).upper()
+        crypto3 = url_decode(params[4].split('=')[1]).upper()
+        crypto4 = url_decode(params[5].split('=')[1]).upper()
+        crypto5 = url_decode(params[6].split('=')[1]).upper()
+        
+        tokens = [crypto1, crypto2, crypto3, crypto4, crypto5]
+        save_tokens(tokens)
         return ssid, password
     return None, None
 
@@ -206,7 +315,7 @@ def enter_ap_mode():
                 response = 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nConfiguration saved. Rebooting...'
                 cl.send(response)
                 cl.close()
-                sleep(3)
+                time.sleep(3)
                 machine.reset()
             else:
                 response = 'HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\n\r\nInvalid Request'
@@ -216,63 +325,67 @@ def enter_ap_mode():
         cl.send(response)
         cl.close()
 
-
 # Remove Credentials
-def remove_credentials(timer):
+def remove_credentials():
     try:
         # Remove the credentials file
         import os
         os.remove('wifi_credentials.json')
-        print("Credentials file removed")
+        os.remove('tokens.json')  # Eliminar también los tokens
+        print("Credentials and tokens file removed")
     except Exception as e:
-        print("Failed to remove credentials file:", e)
+        print("Failed to remove credentials or tokens file:", e)
     # Restart the device
-    sleep(1)
+    time.sleep(1)
     machine.reset()
 
 # Function to fetch and display cryptocurrency data
 def fetch_and_display_crypto_data():
-    crypto_list = [
-        ('BTC', 'Bitcoin'),
-        ('ETH', 'Ethereum'),
-        ('ADA', 'Cardano'),
-        ('BNB', 'Binance Coin'),
-        ('SOL', 'Solana')
-    ]
+    tokens = load_tokens()
 
     display.fill_rectangle(0, 0, display.width, display.height, color565(0, 0, 0))
     y = 10
-    for symbol, name in crypto_list:
+    for symbol in tokens:
+        name = symbol  # Aquí se podría mapear a un nombre más descriptivo si se desea
         price, change = fetch_crypto_data(symbol)
         if price is not None and change is not None:
             display_crypto_data(y, name, symbol, price, change)
         y += 62  # Space between cryptocurrencies
 
-def enable_button(timer):
-    global button_enabled
-    button_enabled = True
+def single_press_action():
+    print("Single press detected - Fetch Data")
+    fetch_and_display_crypto_data()
+    time.sleep(1)
 
-def button_pressed(change):
-    global button_enabled
-    if button_enabled:
-        button_enabled = False
-        print("Fetch Data")
-        fetch_and_display_crypto_data()
-        button_timer.init(mode=Timer.ONE_SHOT, period=10000, callback=enable_button)
-        sleep(1)
+def long_press_action():
+    print("Long press detected - Remove Credentials")
+    remove_credentials()
+
+def handle_button(pin):
+    global button_pressed_time, button_released_time, button_state
+    if pin.value() == 0:  # Button pressed
+        button_pressed_time = time.ticks_ms()
+        button_state = "pressed"
+    else:  # Button released
+        button_released_time = time.ticks_ms()
+        if button_state == "pressed":
+            press_duration = time.ticks_diff(button_released_time, button_pressed_time)
+            if press_duration > LONG_PRESS_TIME:
+                long_press_action()
+            else:
+                single_press_action()
+        button_state = "idle"
+
+button = Pin(BUTTON_PIN, Pin.IN, Pin.PULL_UP) 
+button.irq(trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING, handler=handle_button)
 
 # Main function
 def main():
-    init_wifi()
-    
-    # Configure the button pin with a pull-down resistor
-    button = Pin(BUTTON_PIN, Pin.IN, Pin.PULL_DOWN) 
-    button.irq(handler=button_pressed, trigger=Pin.IRQ_FALLING)
-
+    init_wifi()    
     while True:
         # Fetch and display data initially
         fetch_and_display_crypto_data()
-        sleep(600)
-
+        time.sleep(600)
+        
 if __name__ == '__main__':
     main()
