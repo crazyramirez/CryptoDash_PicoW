@@ -9,6 +9,8 @@ In this mini app you have everything you need to configure the wifi connection o
 <br><br>
 When connecting, **a wifi_credentials.json** file will be created in which the SSDI / Password information of your Wifi connection will be stored.
 <br><br>
+On the next reboot, the device will detect the stored connection and get the data from the Binance API.
+<br><br>
 And of course the simple Crypto Dashboard adapted to the ili9341 screen
 
 ## INSTALL
@@ -33,3 +35,10 @@ The main file "main.py" includes the code, in just over 200 lines you have every
 <br><br>
 If you have another screen model you simply have to find the appropriate drivers and configure the parameters in main.py (TFT screen configuration)
 <br><br>
+
+## TO DO
+- [ ] Include GPIO Button to re-enable Wifi Access Point
+- [ ] Increase screen draw performance
+- [ ] Include mini crypto logos
+
+
