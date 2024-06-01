@@ -17,4 +17,11 @@ A drive will appear on the computer, copy the downloaded Firmware file to the ma
 Now it's time to open your favorite MicroPython editor, in my case I like Thonny, since it's easy and efficient.
 In Thonny go to Run-->Configure Interpreter
 And select MicroPhyton (Raspberry Pi Pico)
-You're all set
+<br>
+<br>
+Download the files from this repository and copy them to the root of your device using your code editor.
+<br>
+<br>
+All set, now you just have to run your code.
+The main file "main.py" includes the code, in just over 200 lines you have everything you need to configure your device's wifi using an Access Point and the simple viewer to display the price of 5 cryptocurrencies adapted to the ili9341 screen.
+If you have another screen model you simply have to find the appropriate drivers and configure the parameters in main.py (TFT screen configuration)
