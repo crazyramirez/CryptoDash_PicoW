@@ -1,7 +1,12 @@
 # CRYPTO DASHBOARD - Raspberry Pi Pico W
 Simple but beautiful Cryptocurrency Dashboard using the Binance API.
-Developed in MicroPython for Raspberry Pi Pico W
+**Developed in MicroPython for Raspberry Pi Pico W**
+<br><br>
 Integrated support for 2.8" TFT LCD display (ili9341), driver included with simple sources.
+<br><br>
+In this mini app you have everything you need to configure the wifi connection of your RPi Pico W through an Access Point from another device.
+<br><br>
+And of course the simple Crypto Dashboard adapted to the ili9341 screen
 
 ## INSTALL
 In this case I'm using the RPi Pico W board, so you need to download the corresponding Firmware:
@@ -18,7 +23,7 @@ And select MicroPhyton (Raspberry Pi Pico)
 Download the files from this repository and copy them to the root of your device using your code editor.
 <br><br>
 ## ALL SET
-now you just have to run your code.
+Now you just have to RUN your code.
 <br><br>
 The main file "main.py" includes the code, in just over 200 lines you have everything you need to configure your device's wifi using an Access Point and the simple viewer to display the price of 5 cryptocurrencies adapted to the ili9341 screen.
 <br><br>
