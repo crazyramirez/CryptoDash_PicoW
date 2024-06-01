@@ -1,10 +1,11 @@
-from machine import Pin, SPI
+from machine import Pin, SPI, Timer
 import network
 import socket
 import urequests as requests
 from ili934xnew import ILI9341, color565
 from time import sleep
 import tt32
+import tt24
 import tt14
 import json
 import machine
@@ -18,13 +19,20 @@ TFT_RST_PIN = 15  # Reset
 TFT_DC_PIN = 14  # Data/Command
 TFT_LED_PIN = 9  # LED
 
+# Button pin configuration
+BUTTON_PIN = 17  # Button connected to GPIO 17
+
 # TFT screen configuration
-spi = SPI(1, baudrate=32000000, polarity=0, phase=0, sck=Pin(TFT_CLK_PIN), mosi=Pin(TFT_MOSI_PIN), miso=Pin(TFT_MISO_PIN))
-display = ILI9341(spi, cs=Pin(TFT_CS_PIN), dc=Pin(TFT_DC_PIN), rst=Pin(TFT_RST_PIN), w=320, h=320, r=0)  # 90-degree rotation
+spi = SPI(1, baudrate=128000000, polarity=0, phase=0, sck=Pin(TFT_CLK_PIN), mosi=Pin(TFT_MOSI_PIN), miso=Pin(TFT_MISO_PIN))
+display = ILI9341(spi, cs=Pin(TFT_CS_PIN), dc=Pin(TFT_DC_PIN), rst=Pin(TFT_RST_PIN), w=320, h=240, r=0)  # 90-degree rotation
 
 # Configure the LED pin
 led = Pin(TFT_LED_PIN, Pin.OUT)
 led.value(1)  # Turn on the backlight
+
+# Timer to prevent button from being pressed more than once every 10 seconds
+button_timer = Timer(-1)
+button_enabled = True
 
 # Save Wi-Fi credentials to a file
 def save_credentials(ssid, password):
@@ -90,7 +98,7 @@ def start_ap_mode():
 # Display connection information on TFT screen
 def display_ap_info():
     display.fill_rectangle(0, 0, display.width, display.height, color565(0, 0, 0))  # Clear screen
-    display.set_font(tt32)
+    display.set_font(tt24)
     display.set_pos(10, 10)
     display.write("Network: CryptoDash")
     display.set_pos(10, 40)
@@ -98,6 +106,7 @@ def display_ap_info():
     display.set_pos(10, 90)
     display.write("Connect and visit:")
     display.set_pos(10, 120)
+    display.set_color(color565(255, 255, 255), color565(0, 0, 255))
     display.write("http://192.168.4.1")
 
 # Configuration HTML page
@@ -170,42 +179,59 @@ def init_wifi():
     if ssid and password and connect_wifi(ssid, password):
         return
     else:
-        ap = start_ap_mode()
-        addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
-        s = socket.socket()
-        s.bind(addr)
-        s.listen(1)
-        print('Listening on', addr)
+        enter_ap_mode()
 
-        while True:
-            cl, addr = s.accept()
-            print('Client connected from', addr)
-            request = cl.recv(1024).decode('utf-8')
-            print('Request:', request)
-            response = ""
+# Function to enter AP mode
+def enter_ap_mode():
+    ap = start_ap_mode()
+    addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
+    s = socket.socket()
+    s.bind(addr)
+    s.listen(1)
+    print('Listening on', addr)
 
-            if 'GET / ' in request:
-                response = 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n' + config_page
-            elif 'POST /configure' in request:
-                ssid, password = handle_configure(request)
-                if ssid and password:
-                    save_credentials(ssid, password)
-                    response = 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nConfiguration saved. Rebooting...'
-                    cl.send(response)
-                    cl.close()
-                    sleep(3)
-                    machine.reset()
-                else:
-                    response = 'HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\n\r\nInvalid Request'
+    while True:
+        cl, addr = s.accept()
+        print('Client connected from', addr)
+        request = cl.recv(1024).decode('utf-8')
+        print('Request:', request)
+        response = ""
+
+        if 'GET / ' in request:
+            response = 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n' + config_page
+        elif 'POST /configure' in request:
+            ssid, password = handle_configure(request)
+            if ssid and password:
+                save_credentials(ssid, password)
+                response = 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nConfiguration saved. Rebooting...'
+                cl.send(response)
+                cl.close()
+                sleep(3)
+                machine.reset()
             else:
-                response = 'HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\nPage not found'
-            
-            cl.send(response)
-            cl.close()
+                response = 'HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\n\r\nInvalid Request'
+        else:
+            response = 'HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\nPage not found'
+        
+        cl.send(response)
+        cl.close()
 
-# Main function
-def main():
-    init_wifi()
+
+# Remove Credentials
+def remove_credentials(timer):
+    try:
+        # Remove the credentials file
+        import os
+        os.remove('wifi_credentials.json')
+        print("Credentials file removed")
+    except Exception as e:
+        print("Failed to remove credentials file:", e)
+    # Restart the device
+    sleep(1)
+    machine.reset()
+
+# Function to fetch and display cryptocurrency data
+def fetch_and_display_crypto_data():
     crypto_list = [
         ('BTC', 'Bitcoin'),
         ('ETH', 'Ethereum'),
@@ -213,15 +239,40 @@ def main():
         ('BNB', 'Binance Coin'),
         ('SOL', 'Solana')
     ]
+
+    display.fill_rectangle(0, 0, display.width, display.height, color565(0, 0, 0))
+    y = 10
+    for symbol, name in crypto_list:
+        price, change = fetch_crypto_data(symbol)
+        if price is not None and change is not None:
+            display_crypto_data(y, name, symbol, price, change)
+        y += 62  # Space between cryptocurrencies
+
+def enable_button(timer):
+    global button_enabled
+    button_enabled = True
+
+def button_pressed(change):
+    global button_enabled
+    if button_enabled:
+        button_enabled = False
+        print("Fetch Data")
+        fetch_and_display_crypto_data()
+        button_timer.init(mode=Timer.ONE_SHOT, period=10000, callback=enable_button)
+        sleep(1)
+
+# Main function
+def main():
+    init_wifi()
+    
+    # Configure the button pin with a pull-down resistor
+    button = Pin(BUTTON_PIN, Pin.IN, Pin.PULL_DOWN) 
+    button.irq(handler=button_pressed, trigger=Pin.IRQ_FALLING)
+
     while True:
-        display.fill_rectangle(0, 0, display.width, display.height, color565(0, 0, 0))
-        y = 10
-        for symbol, name in crypto_list:
-            price, change = fetch_crypto_data(symbol)
-            if price is not None and change is not None:
-                display_crypto_data(y, name, symbol, price, change)
-            y += 62  # Space between cryptocurrencies
-        sleep(120)
+        # Fetch and display data initially
+        fetch_and_display_crypto_data()
+        sleep(600)
 
 if __name__ == '__main__':
     main()
