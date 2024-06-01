@@ -11,6 +11,7 @@ And of course the simple Crypto Dashboard adapted to the ili9341 screen
 
 ## INSTALL
 In this case I'm using the RPi Pico W board, so you need to download the corresponding Firmware:
+<br>
 **https://rpf.io/pico-w-firmware**
 <br><br>
 First of all, have the Pico W disconnected.
