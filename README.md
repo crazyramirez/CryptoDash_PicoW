@@ -7,6 +7,8 @@ Integrated support for 2.8" TFT LCD display (ili9341), driver included with simp
 <br><br>
 In this mini app you have everything you need to configure the wifi connection of your RPi Pico W through an Access Point from another device.
 <br><br>
+When connecting, **a wifi_credentials.json** file will be created in which the SSDI / Password information of your Wifi connection will be stored.
+<br><br>
 And of course the simple Crypto Dashboard adapted to the ili9341 screen
 
 ## INSTALL
