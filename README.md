@@ -49,7 +49,7 @@ Download the files from this repository and copy them to the root of your device
 ## ALL SET
 Now you just have to RUN your code.
 <br><br>
-The main file "main.py" includes the code, in just over 200 lines you have everything you need to configure your device's wifi using an Access Point and the simple viewer to display the price of 5 cryptocurrencies adapted to the ili9341 screen.
+The main file "main.py" includes the code, you need to configure your device's wifi using an Access Point and the simple viewer to display the price of 5 cryptocurrencies adapted to the ili9341 screen.
 <br><br>
 If you have another screen model you simply have to find the appropriate drivers and configure the parameters in main.py (TFT screen configuration)
 <br><br>
