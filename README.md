@@ -1,5 +1,6 @@
 # CRYPTO DASHBOARD - Raspberry Pi Pico W
 Simple but beautiful Cryptocurrency Dashboard using the Binance API.
+<br><br>
 **Developed in MicroPython for Raspberry Pi Pico W**
 <br><br>
 Integrated support for 2.8" TFT LCD display (ili9341), driver included with simple sources.
