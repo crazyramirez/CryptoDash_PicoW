@@ -1,18 +1,30 @@
+
+
+
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
     <title>WiFi Config</title>
     <style>
-        body {
+        html {
+            width: 100vw;
+            height: 100vh;
             background: linear-gradient(45deg, #4e54c8, #d1d3ff);
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        body {
             font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
+            background-color: transparent;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            width: 100vw;
-            margin: 0;
+            user-select: none;
+            -webkit-user-select: none;
         }
         .container {
             background-color: #ffffff;
@@ -21,6 +33,7 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             width: 80%;
             max-width: 320px;
+            margin-top: 30px;
         }
         h2, h5 {
             text-align: center;
@@ -59,10 +72,27 @@
             background-color: #45a049;
         }
     </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('tokens.json')
+                .then(response => response.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        document.getElementById('crypto1').value = data[0] || '';
+                        document.getElementById('crypto2').value = data[1] || '';
+                        document.getElementById('crypto3').value = data[2] || '';
+                        document.getElementById('crypto4').value = data[3] || '';
+                        document.getElementById('crypto5').value = data[4] || '';
+                    }
+                })
+                .catch(error => console.error('Error loading tokens.json:', error));
+        });
+    </script>
 </head>
 <body>
     <div class="container">
         <h2>WiFi Config</h2>
+        <h5>Leave it empty if you're connected</h5>
         <form action="/configure" method="post">
             <div class="input-container">
                 <label for="ssid">SSID</label>
@@ -76,23 +106,23 @@
             <h5>Use Symbol (BTC, ETH, ADA...)</h5>
             <div class="input-container">
                 <label for="crypto1">Cryptocurrency 1</label>
-                <input type="text" id="crypto1" name="crypto1">
+                <input type="text" id="crypto1" name="crypto1" placeholder="Default Value BTC">
             </div>
             <div class="input-container">
                 <label for="crypto2">Cryptocurrency 2</label>
-                <input type="text" id="crypto2" name="crypto2">
+                <input type="text" id="crypto2" name="crypto2" placeholder="Default Value ETH">
             </div>
             <div class="input-container">
                 <label for="crypto3">Cryptocurrency 3</label>
-                <input type="text" id="crypto3" name="crypto3">
+                <input type="text" id="crypto3" name="crypto3" placeholder="Default Value ADA">
             </div>
             <div class="input-container">
                 <label for="crypto4">Cryptocurrency 4</label>
-                <input type="text" id="crypto4" name="crypto4">
+                <input type="text" id="crypto4" name="crypto4" placeholder="Default Value BNB">
             </div>
             <div class="input-container">
                 <label for="crypto5">Cryptocurrency 5</label>
-                <input type="text" id="crypto5" name="crypto5">
+                <input type="text" id="crypto5" name="crypto5" placeholder="Default Value SOL">
             </div>
             <input type="submit" value="SUBMIT">
         </form>

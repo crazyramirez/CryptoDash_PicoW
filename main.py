@@ -9,6 +9,7 @@ import tt24
 import tt14
 import json
 import machine
+import os
 
 # TFT screen pins configuration
 TFT_CLK_PIN = 10  # SCK
@@ -56,12 +57,20 @@ def save_tokens(tokens):
 
 # Load tokens from a file
 def load_tokens():
+    default_tokens = ["BTC", "ETH", "ADA", "BNB", "SOL"]
     try:
+        # Try to open the file in read mode
         with open('tokens.json', 'r') as f:
             tokens = json.load(f)
+        # If the file is empty or invalid JSON, this will raise an exception
+        if not tokens:
+            raise ValueError("Empty file or invalid JSON")
         return tokens
-    except OSError:
-        return ["BTC", "ETH", "ADA", "BNB", "SOL"]  # Default values
+    except (OSError, ValueError):
+        # If the file does not exist, is empty, or contains invalid JSON, create it with default tokens
+        with open('tokens.json', 'w') as f:
+            json.dump(default_tokens, f)
+        return default_tokens
 
 # URL-decode function
 def url_decode(value):
@@ -125,21 +134,33 @@ def display_ap_info():
 
 # Configuration HTML page
 config_page = """
+
+
+
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
     <title>WiFi Config</title>
     <style>
-        body {
+        html {
+            width: 100vw;
+            height: 100vh;
             background: linear-gradient(45deg, #4e54c8, #d1d3ff);
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        body {
             font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
+            background-color: transparent;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            width: 100vw;
-            margin: 0;
+            user-select: none;
+            -webkit-user-select: none;
         }
         .container {
             background-color: #ffffff;
@@ -148,6 +169,7 @@ config_page = """
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             width: 80%;
             max-width: 320px;
+            margin-top: 30px;
         }
         h2, h5 {
             text-align: center;
@@ -186,10 +208,27 @@ config_page = """
             background-color: #45a049;
         }
     </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('tokens.json')
+                .then(response => response.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        document.getElementById('crypto1').value = data[0] || '';
+                        document.getElementById('crypto2').value = data[1] || '';
+                        document.getElementById('crypto3').value = data[2] || '';
+                        document.getElementById('crypto4').value = data[3] || '';
+                        document.getElementById('crypto5').value = data[4] || '';
+                    }
+                })
+                .catch(error => console.error('Error loading tokens.json:', error));
+        });
+    </script>
 </head>
 <body>
     <div class="container">
         <h2>WiFi Config</h2>
+        <h5>Leave it empty if you're connected</h5>
         <form action="/configure" method="post">
             <div class="input-container">
                 <label for="ssid">SSID</label>
@@ -203,23 +242,23 @@ config_page = """
             <h5>Use Symbol (BTC, ETH, ADA...)</h5>
             <div class="input-container">
                 <label for="crypto1">Cryptocurrency 1</label>
-                <input type="text" id="crypto1" name="crypto1">
+                <input type="text" id="crypto1" name="crypto1" placeholder="Default Value BTC">
             </div>
             <div class="input-container">
                 <label for="crypto2">Cryptocurrency 2</label>
-                <input type="text" id="crypto2" name="crypto2">
+                <input type="text" id="crypto2" name="crypto2" placeholder="Default Value ETH">
             </div>
             <div class="input-container">
                 <label for="crypto3">Cryptocurrency 3</label>
-                <input type="text" id="crypto3" name="crypto3">
+                <input type="text" id="crypto3" name="crypto3" placeholder="Default Value ADA">
             </div>
             <div class="input-container">
                 <label for="crypto4">Cryptocurrency 4</label>
-                <input type="text" id="crypto4" name="crypto4">
+                <input type="text" id="crypto4" name="crypto4" placeholder="Default Value BNB">
             </div>
             <div class="input-container">
                 <label for="crypto5">Cryptocurrency 5</label>
-                <input type="text" id="crypto5" name="crypto5">
+                <input type="text" id="crypto5" name="crypto5" placeholder="Default Value SOL">
             </div>
             <input type="submit" value="SUBMIT">
         </form>
@@ -235,16 +274,18 @@ def handle_configure(request):
         params = body.split('&')
         ssid = url_decode(params[0].split('=')[1])
         password = url_decode(params[1].split('=')[1])
-        crypto1 = url_decode(params[2].split('=')[1]).upper()
-        crypto2 = url_decode(params[3].split('=')[1]).upper()
-        crypto3 = url_decode(params[4].split('=')[1]).upper()
-        crypto4 = url_decode(params[5].split('=')[1]).upper()
-        crypto5 = url_decode(params[6].split('=')[1]).upper()
+        
+        crypto1 = url_decode(params[2].split('=')[1]).upper() if params[2].split('=')[1] else 'BTC'
+        crypto2 = url_decode(params[3].split('=')[1]).upper() if params[3].split('=')[1] else 'ETH'
+        crypto3 = url_decode(params[4].split('=')[1]).upper() if params[4].split('=')[1] else 'ADA'
+        crypto4 = url_decode(params[5].split('=')[1]).upper() if params[5].split('=')[1] else 'SOL'
+        crypto5 = url_decode(params[6].split('=')[1]).upper() if params[6].split('=')[1] else 'BNB'
         
         tokens = [crypto1, crypto2, crypto3, crypto4, crypto5]
         save_tokens(tokens)
         return ssid, password
     return None, None
+
 
 # Fetch cryptocurrency data
 def fetch_crypto_data(symbol):
@@ -312,13 +353,11 @@ def enter_ap_mode():
             ssid, password = handle_configure(request)
             if ssid and password:
                 save_credentials(ssid, password)
-                response = 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nConfiguration saved. Rebooting...'
-                cl.send(response)
-                cl.close()
-                time.sleep(3)
-                machine.reset()
-            else:
-                response = 'HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\n\r\nInvalid Request'
+            response = 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nConfiguration saved. Rebooting...'
+            cl.send(response)
+            cl.close()
+            time.sleep(3)
+            machine.reset()
         else:
             response = 'HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\nPage not found'
         
@@ -329,7 +368,6 @@ def enter_ap_mode():
 def remove_credentials():
     try:
         # Remove the credentials file
-        import os
         os.remove('wifi_credentials.json')
         os.remove('tokens.json')  # Eliminar también los tokens
         print("Credentials and tokens file removed")
@@ -359,7 +397,7 @@ def single_press_action():
 
 def long_press_action():
     print("Long press detected - Remove Credentials")
-    remove_credentials()
+    enter_ap_mode()
 
 def handle_button(pin):
     global button_pressed_time, button_released_time, button_state
@@ -381,6 +419,9 @@ button.irq(trigger=Pin.IRQ_FALLING | Pin.IRQ_RISING, handler=handle_button)
 
 # Main function
 def main():
+    tokens = load_tokens()
+    ssid, password = load_credentials()
+    time.sleep(2)
     init_wifi()    
     while True:
         # Fetch and display data initially
