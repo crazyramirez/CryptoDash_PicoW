@@ -47,6 +47,7 @@ If you have another screen model you simply have to find the appropriate drivers
 <br><br>
 
 ## TO DO
+- [x] Include GPIO Button to Refresh Crypto Data
 - [ ] Include GPIO Button to re-enable Wifi Access Point
 - [ ] Increase screen draw performance
 - [ ] Include mini crypto logos
