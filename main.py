@@ -310,18 +310,18 @@ def format_price(price):
     return '{}.{}'.format(integer_part_with_commas, decimal_part)
 
 # Display cryptocurrency data on TFT screen
-def display_crypto_data(y, name, symbol, price, change):
+def display_crypto_data(y, symbol, price, change):
     display.set_font(tt32)
     display.set_pos(10, y)
     formatPrice = format_price(price)
     display.write(f'{symbol}: {formatPrice} $')
-    
     display.set_pos(10, y + 32)
     display.set_font(tt14)
     change_color = color565(0, 255, 0) if change >= 0 else color565(255, 0, 0)
     display.set_color(change_color, color565(0, 0, 0))
     display.write(f'24h Change: {change:.2f}%')
     display.set_color(color565(255, 255, 255), color565(0, 0, 0))  # Reset color
+
 
 # Initialize Wi-Fi or start AP mode if no connection
 def init_wifi():
@@ -384,10 +384,9 @@ def fetch_and_display_crypto_data():
     display.fill_rectangle(0, 0, display.width, display.height, color565(0, 0, 0))
     y = 10
     for symbol in tokens:
-        name = symbol  # Aquí se podría mapear a un nombre más descriptivo si se desea
         price, change = fetch_crypto_data(symbol)
         if price is not None and change is not None:
-            display_crypto_data(y, name, symbol, price, change)
+            display_crypto_data(y, symbol, price, change)
         y += 62  # Space between cryptocurrencies
 
 def single_press_action():
@@ -396,7 +395,7 @@ def single_press_action():
     time.sleep(1)
 
 def long_press_action():
-    print("Long press detected - Remove Credentials")
+    print("Long press detected - Enter AP Mode")
     enter_ap_mode()
 
 def handle_button(pin):
