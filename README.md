@@ -1,4 +1,4 @@
-# CRYPTO DASHBOARD - Raspberry Pi Pico W
+# CRYPTO DASHBOARD - Raspberry Pi Pico W (MicroPython)
 Simple but beautiful Cryptocurrency Dashboard using the Binance API.
 <br><br>
 **Developed in MicroPython for Raspberry Pi Pico W**
