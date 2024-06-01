@@ -16,19 +16,19 @@ Integrated support for 2.8" TFT LCD display (ili9341), driver included with simp
 **https://github.com/jeffmer/micropython-ili9341/tree/master**
 <br><br>
 In this mini app you have everything you need to configure the wifi connection of your RPi Pico W through an Access Point from another device.
-<br><br>
+<br>
 When connecting, **a wifi_credentials.json** file will be created in which the SSID / Password information of your Wifi connection will be stored.
-<br><br>
+<br>
 On the next reboot, the device will detect the stored connection and get the data from the Binance API.
-<br><br>
+<br>
 And of course the simple Crypto Dashboard adapted to the ili9341 screen
 <br><br>
 As you can see in the code, GPIO 17 is configured for a button
-<br><br>
+<br>
 With a single press you reload the Binance data
-<br><br>
+<br>
 If you hold it down for more than 3 seconds the device is reset, deleting the stored json data (wifi_credentials.json and tokens.json)
-<br><br>
+<br>
 Initially the device loads some default Tokens (BTC, ETH, ADA, BNB, SOL)
 
 ## INSTALL
