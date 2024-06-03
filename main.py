@@ -5,7 +5,7 @@ import machine
 import time
 import os
 import urequests as requests
-from machine import Pin, SPI, Timer
+from machine import Pin, SPI, Timer, ADC
 from ili934xnew import ILI9341, color565
 import tt32
 import tt24
@@ -20,6 +20,9 @@ TFT_RST_PIN = 15  # Reset
 TFT_DC_PIN = 14  # Data/Command
 TFT_LED_PIN = 9  # LED
 
+# Battery Level
+vsys_adc = ADC(3)
+
 # Configure the button pin with a pull-down resistor
 BUTTON_PIN = 17  # Button connected to GPIO 17
 LONG_PRESS_TIME = 2000  # Long press time in milliseconds
@@ -28,7 +31,7 @@ button_released_time = 0
 button_state = "idle"
 
 # TFT screen configuration
-spi = SPI(1, baudrate=128000000, polarity=0, phase=0, sck=Pin(TFT_CLK_PIN), mosi=Pin(TFT_MOSI_PIN), miso=Pin(TFT_MISO_PIN))
+spi = SPI(1, baudrate=32000000, polarity=0, phase=0, sck=Pin(TFT_CLK_PIN), mosi=Pin(TFT_MOSI_PIN), miso=Pin(TFT_MISO_PIN))
 display = ILI9341(spi, cs=Pin(TFT_CS_PIN), dc=Pin(TFT_DC_PIN), rst=Pin(TFT_RST_PIN), w=320, h=240, r=0)  # 90-degree rotation
 
 # Configure the LED pin
@@ -59,15 +62,12 @@ def save_tokens(tokens):
 def load_tokens():
     default_tokens = ["BTC", "ETH", "ADA", "BNB", "SOL"]
     try:
-        # Try to open the file in read mode
         with open('tokens.json', 'r') as f:
             tokens = json.load(f)
-        # If the file is empty or invalid JSON, this will raise an exception
         if not tokens:
             raise ValueError("Empty file or invalid JSON")
         return tokens
     except (OSError, ValueError):
-        # If the file does not exist, is empty, or contains invalid JSON, create it with default tokens
         with open('tokens.json', 'w') as f:
             json.dump(default_tokens, f)
         return default_tokens
@@ -140,8 +140,6 @@ def read_html_file(filename):
     except OSError as e:
         print("Failed to read HTML file:", e)
         return ""
-
-# Handle Wi-Fi configuration
 
 # Handle Wi-Fi configuration
 def handle_configure(request):
@@ -219,8 +217,6 @@ def enter_ap_mode():
         cl.send(response)
         cl.close()
 
-
-
 # Fetch cryptocurrency data
 def fetch_crypto_data(symbol):
     try:
@@ -256,7 +252,6 @@ def display_crypto_data(y, symbol, price, change):
     display.write(f'24h Change: {change:.2f}%')
     display.set_color(color565(255, 255, 255), color565(0, 0, 0))  # Reset color
 
-
 # Initialize Wi-Fi or start AP mode if no connection
 def init_wifi():
     ssid, password = load_credentials()
@@ -268,20 +263,17 @@ def init_wifi():
 # Remove Credentials
 def remove_credentials():
     try:
-        # Remove the credentials file
         os.remove('wifi_credentials.json')
-        os.remove('tokens.json')  # Eliminar también los tokens
+        os.remove('tokens.json')
         print("Credentials and tokens file removed")
     except Exception as e:
         print("Failed to remove credentials or tokens file:", e)
-    # Restart the device
     time.sleep(1)
     machine.reset()
 
 # Function to fetch and display cryptocurrency data
 def fetch_and_display_crypto_data():
     tokens = load_tokens()
-
     display.fill_rectangle(0, 0, display.width, display.height, color565(0, 0, 0))
     y = 10
     for symbol in tokens:
@@ -322,11 +314,14 @@ def main():
     tokens = load_tokens()
     ssid, password = load_credentials()
     time.sleep(2)
-    init_wifi()    
+    init_wifi()
+       
     while True:
+        
         # Fetch and display data initially
         fetch_and_display_crypto_data()
         time.sleep(600)
         
 if __name__ == '__main__':
     main()
+
