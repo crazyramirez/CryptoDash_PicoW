@@ -1,6 +1,3 @@
-
-
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -90,6 +87,27 @@
                     }
                 })
                 .catch(error => console.error('Error loading tokens.json:', error));
+
+            document.getElementById('configForm').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const formData = new FormData(event.target);
+                const data = {};
+                formData.forEach((value, key) => data[key] = value);
+                fetch('/configure', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                }).then(response => response.text())
+                .then(data => {
+                    console.log('Success:', data);
+                    alert(data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            });
         });
     </script>
 </head>
@@ -97,7 +115,7 @@
     <div class="container">
         <h2>WiFi Config</h2>
         <h5>Leave it empty if you're connected</h5>
-        <form action="/configure" method="post">
+        <form id="configForm">
             <div class="input-container">
                 <label for="ssid">SSID</label>
                 <input type="text" id="ssid" name="ssid">

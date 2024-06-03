@@ -1,15 +1,15 @@
-from machine import Pin, SPI, Timer
+import json
 import network
 import socket
-import urequests as requests
-from ili934xnew import ILI9341, color565
+import machine
 import time
+import os
+import urequests as requests
+from machine import Pin, SPI, Timer
+from ili934xnew import ILI9341, color565
 import tt32
 import tt24
 import tt14
-import json
-import machine
-import os
 
 # TFT screen pins configuration
 TFT_CLK_PIN = 10  # SCK
@@ -22,7 +22,7 @@ TFT_LED_PIN = 9  # LED
 
 # Configure the button pin with a pull-down resistor
 BUTTON_PIN = 17  # Button connected to GPIO 17
-LONG_PRESS_TIME = 3000  # Long press time in milliseconds
+LONG_PRESS_TIME = 2000  # Long press time in milliseconds
 button_pressed_time = 0
 button_released_time = 0
 button_state = "idle"
@@ -133,158 +133,92 @@ def display_ap_info():
     display.write("http://192.168.4.1")
 
 # Configuration HTML page
-config_page = """
+def read_html_file(filename):
+    try:
+        with open(filename, 'r') as f:
+            return f.read()
+    except OSError as e:
+        print("Failed to read HTML file:", e)
+        return ""
 
-
-
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
-    <title>WiFi Config</title>
-    <style>
-        html {
-            width: 100vw;
-            height: 100vh;
-            background: linear-gradient(45deg, #4e54c8, #d1d3ff);
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background-color: transparent;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        .container {
-            background-color: #ffffff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 80%;
-            max-width: 320px;
-            margin-top: 30px;
-        }
-        h2, h5 {
-            text-align: center;
-            color: #333333;
-        }
-        .input-container {
-            margin: 10px 0px 20px;
-            border-radius: 5px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #797979;
-            background-color: transparent;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            border: none;
-            border-radius: 5px;
-            box-sizing: border-box;
-            background-color: #e9e9e9;
-        }
-        input[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            background-color: #4CAF50;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        input[type="submit"]:hover {
-            background-color: #45a049;
-        }
-    </style>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            fetch('tokens.json')
-                .then(response => response.json())
-                .then(data => {
-                    if (Array.isArray(data)) {
-                        document.getElementById('crypto1').value = data[0] || '';
-                        document.getElementById('crypto2').value = data[1] || '';
-                        document.getElementById('crypto3').value = data[2] || '';
-                        document.getElementById('crypto4').value = data[3] || '';
-                        document.getElementById('crypto5').value = data[4] || '';
-                    }
-                })
-                .catch(error => console.error('Error loading tokens.json:', error));
-        });
-    </script>
-</head>
-<body>
-    <div class="container">
-        <h2>WiFi Config</h2>
-        <h5>Leave it empty if you're connected</h5>
-        <form action="/configure" method="post">
-            <div class="input-container">
-                <label for="ssid">SSID</label>
-                <input type="text" id="ssid" name="ssid">
-            </div>
-            <div class="input-container">
-                <label for="password">PASSWORD</label>
-                <input type="text" id="password" name="password">
-            </div>
-            <h2>Cryptocurrencies</h2>
-            <h5>Use Symbol (BTC, ETH, ADA...)</h5>
-            <div class="input-container">
-                <label for="crypto1">Cryptocurrency 1</label>
-                <input type="text" id="crypto1" name="crypto1" placeholder="Default Value BTC">
-            </div>
-            <div class="input-container">
-                <label for="crypto2">Cryptocurrency 2</label>
-                <input type="text" id="crypto2" name="crypto2" placeholder="Default Value ETH">
-            </div>
-            <div class="input-container">
-                <label for="crypto3">Cryptocurrency 3</label>
-                <input type="text" id="crypto3" name="crypto3" placeholder="Default Value ADA">
-            </div>
-            <div class="input-container">
-                <label for="crypto4">Cryptocurrency 4</label>
-                <input type="text" id="crypto4" name="crypto4" placeholder="Default Value BNB">
-            </div>
-            <div class="input-container">
-                <label for="crypto5">Cryptocurrency 5</label>
-                <input type="text" id="crypto5" name="crypto5" placeholder="Default Value SOL">
-            </div>
-            <input type="submit" value="SUBMIT">
-        </form>
-    </div>
-</body>
-</html>
-"""
+# Handle Wi-Fi configuration
 
 # Handle Wi-Fi configuration
 def handle_configure(request):
-    headers, body = request.split('\r\n\r\n')
+    headers, body = request.split('\r\n\r\n', 1)
+    print(f'Headers: {headers}')
+    print(f'Body: {body}')
+    
     if 'POST /configure' in headers:
-        params = body.split('&')
-        ssid = url_decode(params[0].split('=')[1])
-        password = url_decode(params[1].split('=')[1])
-        
-        crypto1 = url_decode(params[2].split('=')[1]).upper() if params[2].split('=')[1] else 'BTC'
-        crypto2 = url_decode(params[3].split('=')[1]).upper() if params[3].split('=')[1] else 'ETH'
-        crypto3 = url_decode(params[4].split('=')[1]).upper() if params[4].split('=')[1] else 'ADA'
-        crypto4 = url_decode(params[5].split('=')[1]).upper() if params[5].split('=')[1] else 'SOL'
-        crypto5 = url_decode(params[6].split('=')[1]).upper() if params[6].split('=')[1] else 'BNB'
-        
-        tokens = [crypto1, crypto2, crypto3, crypto4, crypto5]
-        save_tokens(tokens)
-        return ssid, password
+        try:
+            data = json.loads(body)
+            print('Received JSON data:', data)
+
+            ssid = data.get('ssid', '')
+            password = data.get('password', '')
+
+            crypto1 = data.get('crypto1', 'BTC').upper()
+            crypto2 = data.get('crypto2', 'ETH').upper()
+            crypto3 = data.get('crypto3', 'ADA').upper()
+            crypto4 = data.get('crypto4', 'SOL').upper()
+            crypto5 = data.get('crypto5', 'BNB').upper()
+            
+            tokens = [crypto1, crypto2, crypto3, crypto4, crypto5]
+            save_tokens(tokens)
+            return ssid, password
+        except ValueError:
+            print('Failed to decode JSON')
+            return None, None
     return None, None
+
+# Function to enter AP mode
+def enter_ap_mode():
+    ap = start_ap_mode()
+    addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
+    s = socket.socket()
+    s.bind(addr)
+    s.listen(1)
+    print('Listening on', addr)
+
+    config_page = read_html_file('config_page.html')
+
+    while True:
+        cl, addr = s.accept()
+        print('Client connected from', addr)
+        
+        request = b""
+        while True:
+            part = cl.recv(1024)
+            request += part
+            if len(part) < 1024:
+                break
+
+        request = request.decode('utf-8')
+        print('Request:', request)
+        response = ""
+
+        if 'GET / ' in request:
+            response = 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n' + config_page
+        elif 'GET /tokens.json' in request:
+            tokens = load_tokens()
+            response = f'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{json.dumps(tokens)}'
+        elif 'POST /configure' in request:
+            ssid, password = handle_configure(request)
+            response_body = f"Received request: {request}\n"
+            if ssid and password:
+                save_credentials(ssid, password)
+                response_body += "Configuration saved. Rebooting..."
+            response = f'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n{response_body}'
+            cl.send(response)
+            cl.close()
+            time.sleep(3)
+            machine.reset()
+        else:
+            response = 'HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\nPage not found'
+        
+        cl.send(response)
+        cl.close()
+
 
 
 # Fetch cryptocurrency data
@@ -330,39 +264,6 @@ def init_wifi():
         return
     else:
         enter_ap_mode()
-
-# Function to enter AP mode
-def enter_ap_mode():
-    ap = start_ap_mode()
-    addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
-    s = socket.socket()
-    s.bind(addr)
-    s.listen(1)
-    print('Listening on', addr)
-
-    while True:
-        cl, addr = s.accept()
-        print('Client connected from', addr)
-        request = cl.recv(1024).decode('utf-8')
-        print('Request:', request)
-        response = ""
-
-        if 'GET / ' in request:
-            response = 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n' + config_page
-        elif 'POST /configure' in request:
-            ssid, password = handle_configure(request)
-            if ssid and password:
-                save_credentials(ssid, password)
-            response = 'HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nConfiguration saved. Rebooting...'
-            cl.send(response)
-            cl.close()
-            time.sleep(3)
-            machine.reset()
-        else:
-            response = 'HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\nPage not found'
-        
-        cl.send(response)
-        cl.close()
 
 # Remove Credentials
 def remove_credentials():
