@@ -58,6 +58,7 @@ If you have another screen model you simply have to find the appropriate drivers
 - [x] Include GPIO Button to Refresh Crypto Data
 - [x] Include GPIO Button to re-enable Wifi Access Point
 - [x] Crypto customizer via Access Point
+- [ ] Fix update data via Access Point from iOS
 - [ ] Increase screen draw performance
 - [ ] Include mini crypto logos
 
