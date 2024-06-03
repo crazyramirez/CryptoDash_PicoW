@@ -23,9 +23,9 @@ Buttons - 2€
 1,500mah battery - 4€
 <br>
 Cables, case and Upstep DC - 2€
-<br>
-Total - 17 € / $ approx.
 <br><br>
+**Total - 17 € / $ approx.
+**<br><br>
 <img src="./images/img5.jpg" alt="CRYPTO DASHBOARD Demo 1" width="48%"/>
 <img src="./images/img6.jpg" alt="CRYPTO DASHBOARD Demo 1" width="48%"/>
 <br><br>
