@@ -3,14 +3,14 @@ Simple but beautiful Cryptocurrency Dashboard using the Binance API.
 <br><br>
 **Developed in MicroPython for Raspberry Pi Pico W**
 <br><br>
-<img src="./images/img1.jpg" alt="CRYPTO DASHBOARD Demo 1" width="47%"/>
-<img src="./images/img2.jpg" alt="CRYPTO DASHBOARD Demo 1" width="47%"/>
+<img src="./images/img1.jpg" alt="CRYPTO DASHBOARD Demo 1" width="48%"/>
+<img src="./images/img2.jpg" alt="CRYPTO DASHBOARD Demo 1" width="48%"/>
 <br><br>
-<img src="./images/img3.jpg" alt="CRYPTO DASHBOARD Demo 1" width="47%"/>
-<img src="./images/img4.jpg" alt="CRYPTO DASHBOARD Demo 1" width="47%"/>
+<img src="./images/img3.jpg" alt="CRYPTO DASHBOARD Demo 1" width="48%"/>
+<img src="./images/img4.jpg" alt="CRYPTO DASHBOARD Demo 1" width="48%"/>
 <br><br>
-<img src="./images/img5.jpg" alt="CRYPTO DASHBOARD Demo 1" width="47%"/>
-<img src="./images/img6.jpg" alt="CRYPTO DASHBOARD Demo 1" width="47%"/>
+<img src="./images/img5.jpg" alt="CRYPTO DASHBOARD Demo 1" width="48%"/>
+<img src="./images/img6.jpg" alt="CRYPTO DASHBOARD Demo 1" width="48%"/>
 <br><br>
 Integrated support for 2.8" TFT LCD display (ili9341), driver included with simple sources.
 <br><br>
