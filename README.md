@@ -9,6 +9,18 @@ Simple but beautiful Cryptocurrency Dashboard using the Binance API.
 <img src="./images/img3.jpg" alt="CRYPTO DASHBOARD Demo 1" width="48%"/>
 <img src="./images/img4.jpg" alt="CRYPTO DASHBOARD Demo 1" width="48%"/>
 <br><br>
+And the fun part
+I finally put in a 1,500mah battery that lasts about 8-10 hours, a power button, a data update button and Access Point mode (Long Press) and a USB charging port
+<br><br>
+Approximate budget:
+Raspberry Pico - 7€
+2.8" screen - 2€
+Buttons - 2€
+1,500mah battery - 4€
+Cables, case and Upstep DC - 2€
+<br>
+Total - 17 € / $ approx.
+<br><br>
 <img src="./images/img5.jpg" alt="CRYPTO DASHBOARD Demo 1" width="48%"/>
 <img src="./images/img6.jpg" alt="CRYPTO DASHBOARD Demo 1" width="48%"/>
 <br><br>
