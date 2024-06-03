@@ -14,11 +14,14 @@ I finally put in a 1,500mah battery that lasts about 8-10 hours, a power button,
 <br><br>
 Approximate budget:
 <br>
-- Raspberry Pico - 7€
-- 2.8" screen - 2€
-- Buttons - 2€
-- 1,500mah battery - 4€
-- Cables, Upstep DC and case - 2€
+Raspberry Pico - 7€
+<br>
+2.8" screen - 2€
+<br>
+Buttons - 2€
+<br>
+1,500mah battery - 4€
+Cables, Upstep DC and case - 2€
 <br><br>
 **Total - 17 € / $ approx.**
 <br><br>
