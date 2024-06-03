@@ -9,8 +9,7 @@ Simple but beautiful Cryptocurrency Dashboard using the Binance API.
 <img src="./images/img3.jpg" alt="CRYPTO DASHBOARD Demo 1" width="48%"/>
 <img src="./images/img4.jpg" alt="CRYPTO DASHBOARD Demo 1" width="48%"/>
 <br><br>
-And the fun part
-I finally put in a 1,500mah battery that lasts about 8-10 hours, a power button, a data update button and Access Point mode (Long Press) and a USB charging port
+And the fun part, the crypto cardboard box
 <br><br>
 Approximate budget:
 <br>
