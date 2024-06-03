@@ -14,18 +14,18 @@ I finally put in a 1,500mah battery that lasts about 8-10 hours, a power button,
 <br><br>
 Approximate budget:
 <br>
-Raspberry Pico - 7€
+- Raspberry Pico - 7€
 <br>
-2.8" screen - 2€
+- 2.8" screen - 2€
 <br>
-Buttons - 2€
+- Buttons - 2€
 <br>
-1,500mah battery - 4€
+- 1,500mah battery - 4€
 <br>
-Cables, case and Upstep DC - 2€
+- Cables, Upstep DC and case - 2€
 <br><br>
-**Total - 17 € / $ approx.
-**<br><br>
+**Total - 17 € / $ approx.**
+<br><br>
 <img src="./images/img5.jpg" alt="CRYPTO DASHBOARD Demo 1" width="48%"/>
 <img src="./images/img6.jpg" alt="CRYPTO DASHBOARD Demo 1" width="48%"/>
 <br><br>
