@@ -9,6 +9,9 @@ Simple but beautiful Cryptocurrency Dashboard using the Binance API.
 <img src="./images/img3.jpg" alt="CRYPTO DASHBOARD Demo 1" width="300"/>
 <img src="./images/img4.jpg" alt="CRYPTO DASHBOARD Demo 1" width="300"/>
 <br><br>
+<img src="./images/img5.jpg" alt="CRYPTO DASHBOARD Demo 1" width="300"/>
+<img src="./images/img6.jpg" alt="CRYPTO DASHBOARD Demo 1" width="300"/>
+<br><br>
 Integrated support for 2.8" TFT LCD display (ili9341), driver included with simple sources.
 <br><br>
 **ILI9341 DRIVERS**
@@ -58,8 +61,8 @@ If you have another screen model you simply have to find the appropriate drivers
 - [x] Include GPIO Button to Refresh Crypto Data
 - [x] Include GPIO Button to re-enable Wifi Access Point
 - [x] Crypto customizer via Access Point
-- [ ] Fix update data via Access Point from iOS
-- [ ] Increase screen draw performance
 - [ ] Include mini crypto logos
 
-
+## KWON BUGS
+- [ ] Fix update data via Access Point from iOS
+- [ ] Increase screen draw performance
