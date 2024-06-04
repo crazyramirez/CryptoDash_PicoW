@@ -32,7 +32,7 @@ Integrated support for 2.8" TFT LCD display (ili9341), driver included with simp
 **ILI9341 DRIVERS**
 <br><br>
 **https://github.com/jeffmer/micropython-ili9341/tree/master**
-<br><br>
+## WIFI CONFIGURATOR
 In this mini app you have everything you need to configure the wifi connection of your RPi Pico W through an Access Point from another device.
 <br>
 When connecting, **a wifi_credentials.json** file will be created in which the SSID / Password information of your Wifi connection will be stored.
