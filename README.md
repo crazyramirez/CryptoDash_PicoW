@@ -45,7 +45,7 @@ As you can see in the code, GPIO 17 is configured for a button
 <br>
 With a single press you reload the Binance data
 <br>
-If you hold it down for more than 3 seconds the device is reset, deleting the stored json data (wifi_credentials.json and tokens.json)
+If you hold it down for more than 3 seconds the device is reset and enters in Access Point mode.
 <br>
 Initially the device loads some default Tokens (BTC, ETH, ADA, BNB, SOL)
 
